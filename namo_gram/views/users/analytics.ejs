@@ -1,0 +1,499 @@
+<% layout("/layouts/boilerplate.ejs") %>
+
+<!-- Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+
+<div class="container py-4" style="max-width: 960px;">
+  <!-- Header Bar -->
+  <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+    <div class="d-flex align-items-center gap-3">
+      <div class="likes-user-avatar" style="width: 52px; height: 52px; font-size: 1.4rem;">
+        <%= user.username.charAt(0).toUpperCase() %>
+      </div>
+      <div>
+        <h3 class="text-white fw-bold mb-0 d-flex align-items-center gap-2">
+          Profile Analytics
+          <span class="badge bg-primary text-white fs-6">
+            <i class="fa-solid fa-wand-magic-sparkles me-1"></i> Creator Hub
+          </span>
+        </h3>
+        <p class="text-secondary small mb-0">Real follower demographics, consumed content categories & audience insights</p>
+      </div>
+    </div>
+
+    <div>
+      <a href="/profile" class="btn btn-outline-custom btn-sm">
+        <i class="fa-solid fa-arrow-left me-1"></i> Back to Profile
+      </a>
+    </div>
+  </div>
+
+  <% if (!isCreator) { %>
+    <!-- Notice if account is private -->
+    <div class="custom-card text-center py-5 my-4">
+      <i class="fa-solid fa-chart-line fa-3x text-primary mb-3"></i>
+      <h4 class="text-white">Creator Analytics Locked</h4>
+      <p class="text-secondary mx-auto mb-4" style="max-width: 480px;">
+        Profile analytics is exclusively available for <strong>Creator Accounts</strong>. Switch your account type to unlock follower demographics and content metrics.
+      </p>
+      <form action="/profile/account-type" method="POST" class="d-inline">
+        <input type="hidden" name="accountType" value="creator">
+        <button type="submit" class="btn btn-primary-custom px-4">
+          <i class="fa-solid fa-wand-magic-sparkles me-2"></i> Switch to Creator Account
+        </button>
+      </form>
+    </div>
+  <% } else { %>
+    <!-- Overview Metrics Row -->
+    <div class="row g-3 mb-4">
+      <div class="col-6 col-md-3">
+        <div class="custom-card p-3 text-center">
+          <div class="text-primary mb-1"><i class="fa-solid fa-users fa-lg"></i></div>
+          <h3 class="fw-bold text-white mb-0"><%= followersCount %></h3>
+          <small class="text-secondary fw-semibold">Total Followers</small>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="custom-card p-3 text-center">
+          <div class="text-info mb-1"><i class="fa-solid fa-user-plus fa-lg"></i></div>
+          <h3 class="fw-bold text-white mb-0"><%= followingCount %></h3>
+          <small class="text-secondary fw-semibold">Following</small>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="custom-card p-3 text-center">
+          <div class="text-primary mb-1"><i class="fa-solid fa-images fa-lg"></i></div>
+          <h3 class="fw-bold text-white mb-0"><%= postsCount %></h3>
+          <small class="text-secondary fw-semibold">Published Posts</small>
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="custom-card p-3 text-center">
+          <div class="text-danger mb-1"><i class="fa-solid fa-heart fa-lg"></i></div>
+          <h3 class="fw-bold text-white mb-0"><%= totalLikes %></h3>
+          <small class="text-secondary fw-semibold">Post Likes</small>
+        </div>
+      </div>
+    </div>
+
+    <!-- Real Data Summary Banner -->
+    <div class="custom-card p-3 mb-4 d-flex flex-wrap align-items-center justify-content-between gap-3">
+      <div class="d-flex align-items-center gap-3">
+        <span class="badge bg-success-subtle text-success p-2 rounded-circle" style="width: 42px; height: 42px; display: flex; align-items: center; justify-content: center;">
+          <i class="fa-solid fa-database fa-lg"></i>
+        </span>
+        <div>
+          <span class="text-white fw-bold d-block small mb-1">Live Followers Activity</span>
+          <span class="text-secondary small d-block">
+            <% if (followersCount === 0) { %>
+              You currently have 0 followers. Demographic & content metrics will populate as users follow you.
+            <% } else { %>
+              Audience data aggregated from <strong class="text-white"><%= followersCount %> follower<%= followersCount > 1 ? 's' : '' %></strong> with <strong class="text-white"><%= totalFollowerLikes %> total liked post<%= totalFollowerLikes !== 1 ? 's' : '' %></strong> across NamoGram.
+            <% } %>
+          </span>
+        </div>
+      </div>
+      <div class="text-end">
+        <span class="badge bg-dark border border-secondary text-info">
+          <i class="fa-solid fa-circle-check me-1 text-success"></i> Real Data Engine
+        </span>
+      </div>
+    </div>
+
+    <!-- Demographics Graphs Row -->
+    <div class="row g-4 mb-4">
+      <!-- Gender Breakdown Chart -->
+      <div class="col-md-6">
+        <div class="custom-card p-4 h-100 d-flex flex-column justify-content-between">
+          <div>
+            <div class="d-flex align-items-center justify-content-between mb-3">
+              <h5 class="text-white fw-bold mb-0">
+                <i class="fa-solid fa-venus-mars text-primary me-2"></i>Follower Gender Breakdown
+              </h5>
+              <span class="badge bg-dark border border-secondary text-info small">Demographics</span>
+            </div>
+
+            <% if (followersCount === 0) { %>
+              <div class="text-center py-5 text-muted">
+                <i class="fa-solid fa-users-slash fa-2x mb-2 d-block opacity-50"></i>
+                <p class="small mb-0">No followers yet. Gender distribution will appear once you gain followers.</p>
+              </div>
+            <% } else { %>
+              <div style="height: 240px; position: relative;">
+                <canvas id="genderChart"></canvas>
+              </div>
+            <% } %>
+          </div>
+
+          <div class="d-flex flex-wrap justify-content-around gap-2 mt-3 pt-2 border-top border-secondary border-opacity-25 text-center small text-muted">
+            <div><span class="badge me-1" style="background-color: #ec4899;">&nbsp;</span> Female: <strong><%= genderPercentages.female %>%</strong> (<%= genderCounts.female %>)</div>
+            <div><span class="badge me-1" style="background-color: #0095f6;">&nbsp;</span> Male: <strong><%= genderPercentages.male %>%</strong> (<%= genderCounts.male %>)</div>
+            <div><span class="badge me-1" style="background-color: #a855f7;">&nbsp;</span> Other: <strong><%= genderPercentages.other %>%</strong> (<%= genderCounts.other %>)</div>
+            <% if (genderCounts.unspecified > 0) { %>
+              <div><span class="badge me-1" style="background-color: #64748b;">&nbsp;</span> Private: <strong><%= genderPercentages.unspecified %>%</strong> (<%= genderCounts.unspecified %>)</div>
+            <% } %>
+          </div>
+        </div>
+      </div>
+
+      <!-- Age Distribution Chart -->
+      <div class="col-md-6">
+        <div class="custom-card p-4 h-100 d-flex flex-column justify-content-between">
+          <div>
+            <div class="d-flex align-items-center justify-content-between mb-3">
+              <h5 class="text-white fw-bold mb-0">
+                <i class="fa-solid fa-chart-column text-primary me-2"></i>Follower Age Distribution
+              </h5>
+              <span class="badge bg-dark border border-secondary text-info small">Age Range</span>
+            </div>
+
+            <% if (followersCount === 0) { %>
+              <div class="text-center py-5 text-muted">
+                <i class="fa-solid fa-chart-simple fa-2x mb-2 d-block opacity-50"></i>
+                <p class="small mb-0">No followers yet. Age ranges will appear once you gain followers.</p>
+              </div>
+            <% } else { %>
+              <div style="height: 240px; position: relative;">
+                <canvas id="ageChart"></canvas>
+              </div>
+            <% } %>
+          </div>
+
+          <div class="text-center mt-3 pt-2 border-top border-secondary border-opacity-25 text-muted small">
+            <% if (topAgeBracket && maxAgeCount > 0) { %>
+              Core audience concentration in <strong><%= topAgeBracket %></strong> bracket (<%= maxAgeCount %> follower<%= maxAgeCount > 1 ? 's' : '' %>)
+            <% } else { %>
+              No follower age data recorded yet.
+            <% } %>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Content Consumption by Post Tags Graph -->
+    <div class="custom-card p-4 mb-4">
+      <% 
+        const sortedTagEntries = Object.entries(tagCounts).sort((a, b) => b[1] - a[1]);
+        const topTagsList = sortedTagEntries.slice(0, 4);
+      %>
+      <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+        <div>
+          <h5 class="text-white fw-bold mb-1">
+            <i class="fa-solid fa-tags text-primary me-2"></i>Content Consumption by Post Tags
+          </h5>
+          <p class="text-secondary small mb-0">Type of content and topics your followers are liking & consuming across NamoGram</p>
+        </div>
+        <% if (topTagsList.length > 0) { %>
+          <span class="badge bg-dark border border-primary text-primary px-3 py-2">
+            <%= topTagsList.map(t => '#' + t[0]).join(' • ') %>
+          </span>
+        <% } else { %>
+          <span class="badge bg-dark border border-secondary text-secondary px-3 py-2">
+            No topic data yet
+          </span>
+        <% } %>
+      </div>
+
+      <% if (sortedTagEntries.length === 0) { %>
+        <div class="text-center py-5 text-secondary">
+          <i class="fa-solid fa-heart-crack fa-2x mb-2 d-block opacity-50"></i>
+          <p class="small mb-0">Your followers have not liked any tagged posts yet. When they consume and like posts across NamoGram, their topic preferences will be analyzed here.</p>
+        </div>
+      <% } else { %>
+        <div style="height: 280px; position: relative;">
+          <canvas id="tagsChart"></canvas>
+        </div>
+      <% } %>
+    </div>
+
+    <!-- Interaction Growth Graph -->
+    <div class="custom-card p-4 mb-4">
+      <% const totalWeeklyInteractions = velocityData.reduce((a, b) => a + b, 0); %>
+      <div class="d-flex align-items-center justify-content-between mb-3">
+        <div>
+          <h5 class="text-white fw-bold mb-1">
+            <i class="fa-solid fa-arrow-trend-up text-primary me-2"></i>Weekly Consumption Activity
+          </h5>
+          <p class="text-secondary small mb-0">Day-of-week engagement distribution from posts liked by your followers</p>
+        </div>
+        <span class="badge bg-dark border border-secondary <%= totalWeeklyInteractions > 0 ? 'text-success' : 'text-secondary' %> small">
+          <%= totalWeeklyInteractions %> follower interaction<%= totalWeeklyInteractions !== 1 ? 's' : '' %>
+        </span>
+      </div>
+      <div style="height: 220px; position: relative;">
+        <canvas id="velocityChart"></canvas>
+      </div>
+    </div>
+
+    <!-- Follower Audience & Consumed Content Insights Table -->
+    <div class="custom-card p-4 mb-4">
+      <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+        <div>
+          <h5 class="text-white fw-bold mb-1">
+            <i class="fa-solid fa-users-viewfinder text-primary me-2"></i>Follower Audience & Content Insights
+          </h5>
+          <p class="text-secondary small mb-0">Individual breakdown of each follower, their demographic profile, and preferred content categories</p>
+        </div>
+        <span class="badge bg-dark border border-secondary text-info">
+          <%= followerInsights.length %> Profile<%= followerInsights.length !== 1 ? 's' : '' %> Tracked
+        </span>
+      </div>
+
+      <% if (followerInsights.length === 0) { %>
+        <div class="text-center py-4 text-secondary">
+          <i class="fa-solid fa-user-plus fa-2x mb-2 d-block opacity-50"></i>
+          <p class="small mb-2">You don't have any followers yet.</p>
+          <a href="/search" class="btn btn-outline-custom btn-sm">
+            <i class="fa-solid fa-magnifying-glass me-1"></i> Discover & Connect with Creators
+          </a>
+        </div>
+      <% } else { %>
+        <div class="table-responsive">
+          <table class="table table-dark table-hover align-middle mb-0" style="background: transparent;">
+            <thead>
+              <tr class="text-secondary small text-uppercase" style="border-bottom: 1px solid rgba(255,255,255,0.15); font-weight: 600;">
+                <th>Follower</th>
+                <th>Gender</th>
+                <th>Age</th>
+                <th>Liked Posts</th>
+                <th>Top Content Topics</th>
+                <th class="text-end">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% followerInsights.forEach(f => { %>
+                <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                  <td>
+                    <div class="d-flex align-items-center gap-2">
+                      <div class="likes-user-avatar" style="width: 34px; height: 34px; font-size: 0.9rem;">
+                        <%= f.username.charAt(0).toUpperCase() %>
+                      </div>
+                      <div>
+                        <a href="/profile/<%= f.username %>" class="text-white fw-semibold text-decoration-none d-block">
+                          @<%= f.username %>
+                        </a>
+                      </div>
+                    </div>
+                  </td>
+                  <td>
+                    <% if (f.gender === 'female') { %>
+                      <span class="badge" style="background-color: rgba(236, 72, 153, 0.2); color: #f472b6; border: 1px solid rgba(236, 72, 153, 0.4);">
+                        <i class="fa-solid fa-venus me-1"></i> Female
+                      </span>
+                    <% } else if (f.gender === 'male') { %>
+                      <span class="badge" style="background-color: rgba(0, 149, 246, 0.2); color: #38bdf8; border: 1px solid rgba(0, 149, 246, 0.4);">
+                        <i class="fa-solid fa-mars me-1"></i> Male
+                      </span>
+                    <% } else if (f.gender === 'other') { %>
+                      <span class="badge" style="background-color: rgba(168, 85, 247, 0.2); color: #c084fc; border: 1px solid rgba(168, 85, 247, 0.4);">
+                        <i class="fa-solid fa-genderless me-1"></i> Other
+                      </span>
+                    <% } else { %>
+                      <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle">
+                        Unspecified
+                      </span>
+                    <% } %>
+                  </td>
+                  <td>
+                    <span class="text-light small fw-medium">
+                      <%= f.age !== 'N/A' ? f.age + ' yrs' : 'Not set' %>
+                    </span>
+                  </td>
+                  <td>
+                    <span class="badge bg-danger-subtle text-danger border border-danger-subtle px-2 py-1">
+                      <i class="fa-solid fa-heart me-1"></i> <%= f.likedCount %>
+                    </span>
+                  </td>
+                  <td>
+                    <% if (f.topTags && f.topTags.length > 0) { %>
+                      <div class="d-flex flex-wrap gap-1">
+                        <% f.topTags.forEach(t => { %>
+                          <span class="badge bg-dark border border-secondary text-info small" style="font-size: 0.75rem;">
+                            #<%= t %>
+                          </span>
+                        <% }) %>
+                      </div>
+                    <% } else { %>
+                      <span class="text-muted small">No likes yet</span>
+                    <% } %>
+                  </td>
+                  <td class="text-end">
+                    <a href="/profile/<%= f.username %>" class="btn btn-outline-custom btn-sm py-1 px-2" style="font-size: 0.8rem;">
+                      View Profile
+                    </a>
+                  </td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      <% } %>
+    </div>
+
+    <!-- Initialize Chart.js Graphs with Real Follower Data -->
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        // Shared Chart.js styling
+        Chart.defaults.color = '#94a3b8';
+        Chart.defaults.font.family = "'Plus Jakarta Sans', sans-serif";
+
+        // 1. Follower Gender Breakdown Doughnut Chart
+        const genderCtx = document.getElementById('genderChart')?.getContext('2d');
+        if (genderCtx) {
+          const femaleCount = <%= genderCounts.female %>;
+          const maleCount = <%= genderCounts.male %>;
+          const otherCount = <%= genderCounts.other %>;
+          const unspecifiedCount = <%= genderCounts.unspecified %>;
+
+          new Chart(genderCtx, {
+            type: 'doughnut',
+            data: {
+              labels: ['Female', 'Male', 'Other', 'Private/Unspecified'],
+              datasets: [{
+                data: [femaleCount, maleCount, otherCount, unspecifiedCount],
+                backgroundColor: ['#ec4899', '#0095f6', '#a855f7', '#64748b'],
+                borderColor: '#0f131a',
+                borderWidth: 3,
+                hoverOffset: 6
+              }]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: {
+                legend: { position: 'bottom', labels: { boxWidth: 12, padding: 12 } }
+              },
+              cutout: '68%'
+            }
+          });
+        }
+
+        // 2. Follower Age Distribution Bar Chart
+        const ageCtx = document.getElementById('ageChart')?.getContext('2d');
+        if (ageCtx) {
+          new Chart(ageCtx, {
+            type: 'bar',
+            data: {
+              labels: ['13-17', '18-24', '25-34', '35-44', '45+'],
+              datasets: [{
+                label: 'Followers Count',
+                data: [
+                  <%= ageGroups['13-17'] %>, 
+                  <%= ageGroups['18-24'] %>, 
+                  <%= ageGroups['25-34'] %>, 
+                  <%= ageGroups['35-44'] %>, 
+                  <%= ageGroups['45+'] %>
+                ],
+                backgroundColor: '#0095f6',
+                borderRadius: 6,
+                borderSkipped: false
+              }]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: { legend: { display: false } },
+              scales: {
+                y: {
+                  beginAtZero: true,
+                  ticks: { precision: 0 },
+                  grid: { color: 'rgba(255, 255, 255, 0.05)' }
+                },
+                x: {
+                  grid: { display: false }
+                }
+              }
+            }
+          });
+        }
+
+        // 3. Content Consumption Tags Chart (From followers' liked posts)
+        const tagsCtx = document.getElementById('tagsChart')?.getContext('2d');
+        if (tagsCtx) {
+          <% 
+            const topTagEntries = Object.entries(tagCounts).sort((a,b) => b[1] - a[1]).slice(0, 10);
+            const tagLabels = topTagEntries.map(e => e[0]);
+            const tagValues = topTagEntries.map(e => e[1]);
+          %>
+          const tagLabels = <%- JSON.stringify(tagLabels) %>;
+          const tagValues = <%- JSON.stringify(tagValues) %>;
+
+          if (tagLabels.length > 0) {
+            new Chart(tagsCtx, {
+              type: 'bar',
+              data: {
+                labels: tagLabels.map(t => '#' + t),
+                datasets: [{
+                  label: 'Follower Interactions',
+                  data: tagValues,
+                  backgroundColor: [
+                    '#0095f6', '#38bdf8', '#0284c7', '#06b6d4',
+                    '#1d4ed8', '#2563eb', '#60a5fa', '#93c5fd',
+                    '#a855f7', '#ec4899'
+                  ],
+                  borderRadius: 8
+                }]
+              },
+              options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                indexAxis: 'y',
+                plugins: {
+                  legend: { display: false }
+                },
+                scales: {
+                  x: {
+                    beginAtZero: true,
+                    ticks: { precision: 0 },
+                    grid: { color: 'rgba(255, 255, 255, 0.05)' }
+                  },
+                  y: {
+                    grid: { display: false }
+                  }
+                }
+              }
+            });
+          }
+        }
+
+        // 4. Weekly Consumption Velocity Line Chart
+        const velocityCtx = document.getElementById('velocityChart')?.getContext('2d');
+        if (velocityCtx) {
+          const velocityData = <%- JSON.stringify(velocityData) %>;
+
+          new Chart(velocityCtx, {
+            type: 'line',
+            data: {
+              labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+              datasets: [{
+                label: 'Follower Interactions',
+                data: velocityData,
+                borderColor: '#0095f6',
+                backgroundColor: 'rgba(0, 149, 246, 0.12)',
+                fill: true,
+                tension: 0.35,
+                pointBackgroundColor: '#00d2ff',
+                pointRadius: 4
+              }]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: { legend: { display: false } },
+              scales: {
+                y: {
+                  beginAtZero: true,
+                  ticks: { precision: 0 },
+                  grid: { color: 'rgba(255, 255, 255, 0.05)' }
+                },
+                x: {
+                  grid: { display: false }
+                }
+              }
+            }
+          });
+        }
+      });
+    </script>
+  <% } %>
+</div>

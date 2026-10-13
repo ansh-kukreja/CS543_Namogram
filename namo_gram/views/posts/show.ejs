@@ -1,0 +1,142 @@
+<% layout("/layouts/boilerplate") -%>
+
+<% 
+  const isLiked = post.likes && post.likes.includes(currUser.username);
+  const isOwner = post.userId === currUser.username;
+  const now = new Date();
+  const postTime = post.uploadTime ? new Date(post.uploadTime) : new Date();
+  const diffSec = Math.max(0, Math.floor((now - postTime) / 1000));
+  let timeDisplay = "Just now";
+  if (diffSec >= 60 && diffSec < 3600) {
+    timeDisplay = `${Math.floor(diffSec / 60)} min ago`;
+  } else if (diffSec >= 3600 && diffSec < 86400) {
+    timeDisplay = `${Math.floor(diffSec / 3600)} h ago`;
+  } else if (diffSec >= 86400) {
+    timeDisplay = `${Math.floor(diffSec / 86400)} d ago`;
+  }
+%>
+
+<div class="feed-container py-3">
+  <div class="mb-3">
+    <a href="/posts" class="btn btn-outline-custom btn-sm">
+      <i class="fa-solid fa-arrow-left me-1"></i> Back to Feed
+    </a>
+  </div>
+
+  <article class="post-card">
+    <!-- Header -->
+    <div class="post-header">
+      <div class="post-user-info">
+        <a href="/profile/<%= post.userId %>" class="text-decoration-none">
+          <div class="post-avatar-fallback">
+            <%= post.userId ? post.userId.charAt(0).toUpperCase() : 'U' %>
+          </div>
+        </a>
+        <div class="post-username-box">
+          <a href="/profile/<%= post.userId %>" class="post-username">
+            <%= post.userId %>
+          </a>
+          <span class="post-dot">&bull;</span>
+          <span class="post-time"><%= timeDisplay %></span>
+        </div>
+      </div>
+
+      <% if (isOwner) { %>
+        <div class="d-flex gap-2">
+          <a href="/posts/<%= post._id %>/edit" class="btn btn-outline-custom btn-sm">
+            <i class="fa-regular fa-pen-to-square"></i> Edit
+          </a>
+          <form action="/posts/<%= post._id %>?_method=DELETE" method="POST" onsubmit="return confirm('Delete this post?');" class="d-inline">
+            <button class="btn btn-outline-danger btn-sm" type="submit">
+              <i class="fa-regular fa-trash-can"></i>
+            </button>
+          </form>
+        </div>
+      <% } %>
+    </div>
+
+    <!-- Media -->
+    <div class="post-media">
+      <img 
+        src="<%= post.image %>" 
+        alt="<%= post.caption || 'Post image' %>" 
+        class="post-image"
+        onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=900&auto=format&fit=crop';"
+      >
+    </div>
+
+    <!-- Actions (Only like button) -->
+    <div class="post-actions">
+      <div class="action-btns-left">
+        <button 
+          type="button" 
+          class="post-icon-btn like-btn <%= isLiked ? 'liked' : '' %>" 
+          data-post-id="<%= post._id %>"
+          title="<%= isLiked ? 'Unlike' : 'Like' %>"
+        >
+          <i class="<%= isLiked ? 'fa-solid fa-heart' : 'fa-regular fa-heart' %>"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Likes Section -->
+    <div class="post-likes-section">
+      <button 
+        type="button" 
+        class="likes-view-btn" 
+        data-bs-toggle="modal" 
+        data-bs-target="#likesModal-<%= post._id %>"
+      >
+        <span id="like-count-<%= post._id %>"><%= post.likes ? post.likes.length : 0 %></span> likes
+      </button>
+    </div>
+
+    <!-- Caption -->
+    <% if (post.caption) { %>
+      <div class="post-caption-section">
+        <span class="post-caption-text">
+          <a href="/profile/<%= post.userId %>" class="post-username me-1"><%= post.userId %></a>
+          <%= post.caption %>
+        </span>
+      </div>
+    <% } %>
+
+    <!-- Tags -->
+    <% if (post.tags && post.tags.length > 0) { %>
+      <div class="post-tags-list">
+        <% for (let tag of post.tags) { %>
+          <a href="/posts?tag=<%= tag %>" class="post-tag-badge">#<%= tag %></a>
+        <% } %>
+      </div>
+    <% } %>
+  </article>
+
+  <!-- Modal for Post Likes List -->
+  <div class="modal fade" id="likesModal-<%= post._id %>" tabindex="-1" aria-labelledby="likesModalLabel-<%= post._id %>" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content custom-dark-modal">
+        <div class="modal-header">
+          <h5 class="modal-title" id="likesModalLabel-<%= post._id %>">Likes</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body" id="likesList-<%= post._id %>">
+          <% if (!post.likes || post.likes.length === 0) { %>
+            <div class="text-muted text-center py-4">No likes yet. Be the first to like this!</div>
+          <% } else { %>
+            <% for (let likeUser of post.likes) { %>
+              <div class="likes-user-row">
+                <div class="likes-user-left">
+                  <div class="likes-user-avatar">
+                    <%= likeUser.charAt(0).toUpperCase() %>
+                  </div>
+                  <a href="/profile/<%= likeUser %>" class="likes-user-name"><%= likeUser %></a>
+                </div>
+                <a href="/profile/<%= likeUser %>" class="btn btn-outline-custom btn-sm">View Profile</a>
+              </div>
+            <% } %>
+          <% } %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

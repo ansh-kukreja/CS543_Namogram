@@ -1,0 +1,103 @@
+<% layout("/layouts/boilerplate") -%>
+
+<div class="feed-container py-4">
+  <div class="custom-card">
+    <div class="d-flex align-items-center justify-content-between mb-4 border-bottom border-dark-subtle pb-3">
+      <h4 class="text-white mb-0 fw-bold">
+        <i class="fa-regular fa-square-plus text-primary me-2"></i>Create New Post
+      </h4>
+      <a href="/posts" class="btn btn-outline-custom btn-sm">Cancel</a>
+    </div>
+
+    <% if (error) { %>
+      <div class="alert alert-danger py-2 px-3 mb-3 small" role="alert">
+        <i class="fa-solid fa-circle-exclamation me-1"></i> <%= error %>
+      </div>
+    <% } %>
+
+    <form action="/posts" method="POST" id="postForm">
+      <!-- Image URL Field (No upload - URL only) -->
+      <div class="mb-4">
+        <label for="postImageUrl" class="form-label">
+          Image URL <span class="text-primary">*</span>
+        </label>
+        <input 
+          type="url" 
+          name="post[image]" 
+          id="postImageUrl" 
+          class="form-control" 
+          placeholder="Paste direct image URL (e.g. https://images.unsplash.com/...)" 
+          required
+        >
+        <small class="text-secondary d-block mt-1">
+          <i class="fa-solid fa-link me-1"></i> Paste a direct link to any image on the web (Unsplash, Pexels, etc.)
+        </small>
+
+        <!-- Live Image Preview Box -->
+        <div class="mt-3">
+          <label class="form-label small text-secondary">Preview</label>
+          <div class="image-preview-box">
+            <img id="previewImage" class="image-preview-img" style="display: none;" alt="Preview">
+            <div id="previewPlaceholder" class="image-preview-empty">
+              <i class="fa-regular fa-image fa-2x mb-2 d-block"></i>
+              Enter an image URL above to see live preview
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Caption Field -->
+      <div class="mb-4">
+        <label for="postCaption" class="form-label">Caption</label>
+        <textarea 
+          name="post[caption]" 
+          id="postCaption" 
+          class="form-control" 
+          rows="3" 
+          placeholder="Write a captivating caption for your post..."
+        ></textarea>
+      </div>
+
+      <!-- Pre-written Tags Field (Min 1, Max 3) -->
+      <div class="mb-4">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <label class="form-label mb-0">
+            Select Tags <span class="text-primary">*</span>
+          </label>
+          <span class="badge bg-dark border border-secondary text-info">
+            Selected: <span id="tagCount">0</span> / 3 (Min 1, Max 3)
+          </span>
+        </div>
+
+        <div class="tags-selector-wrapper">
+          <div class="tags-chips-container">
+            <% for (let tag of allowedTags) { %>
+              <label class="tag-chip-label">
+                <input 
+                  type="checkbox" 
+                  name="post[tags][]" 
+                  value="<%= tag %>" 
+                  class="tag-chip-checkbox"
+                >
+                <span class="tag-chip-btn">#<%= tag %></span>
+              </label>
+            <% } %>
+          </div>
+          <small class="text-secondary d-block">
+            Choose between 1 and 3 relevant tags for your post.
+          </small>
+          <div id="tagError" class="text-danger small mt-2 fw-semibold" style="display: none;">
+            <i class="fa-solid fa-circle-exclamation me-1"></i> Please choose at least 1 and at most 3 tags before posting.
+          </div>
+        </div>
+      </div>
+
+      <!-- Submit Button -->
+      <div class="d-grid mt-4">
+        <button type="submit" class="btn btn-primary-custom py-2 fw-bold">
+          <i class="fa-solid fa-cloud-arrow-up me-2"></i> Share Post
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

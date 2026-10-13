@@ -1,0 +1,112 @@
+<% layout("/layouts/boilerplate.ejs") %>
+
+<div class="container" style="max-width: 440px;">
+  <div class="custom-card text-center">
+    <div class="mb-4">
+      <div class="mb-3 d-flex justify-content-center">
+        <%- include("../includes/logo.ejs", { size: 54 }) %>
+      </div>
+      <h3 class="fw-bold text-white mb-1">Join NamoGram</h3>
+      <p class="text-secondary small">Sign up to see photos & connect with creators</p>
+    </div>
+
+    <% if (error) { %>
+      <div class="alert alert-danger py-2 px-3 mb-3 small text-start" role="alert">
+        <i class="fa-solid fa-circle-exclamation me-1"></i> <%= error %>
+      </div>
+    <% } %>
+
+    <form action="/signup" method="POST" class="text-start" id="signupForm">
+      <div class="mb-3">
+        <label for="usernameInput" class="form-label">
+          Username <span class="text-primary">*</span>
+        </label>
+        <div class="input-group">
+          <input 
+            name="username" 
+            type="text" 
+            id="usernameInput" 
+            class="form-control" 
+            placeholder="e.g. ansh_k, alex99" 
+            required 
+            pattern="[a-zA-Z0-9_]{3,30}"
+            title="3-30 letters, numbers, or underscores"
+            autofocus
+          />
+          <button type="button" id="validateUsernameBtn" class="btn btn-outline-custom">
+            <span id="validateBtnText">Validate</span>
+          </button>
+        </div>
+        <div id="usernameStatus" class="small mt-1 fw-semibold" style="display: none;"></div>
+        <small class="text-secondary d-block mt-1">
+          Username is permanent and cannot be changed after account creation.
+        </small>
+      </div>
+
+      <div class="mb-3">
+        <label for="email" class="form-label">
+          Email <span class="text-primary">*</span>
+        </label>
+        <input 
+          name="email" 
+          type="email" 
+          id="email" 
+          class="form-control" 
+          placeholder="name@example.com" 
+          required
+        />
+      </div>
+
+      <div class="mb-3">
+        <label for="password" class="form-label">
+          Password <span class="text-primary">*</span>
+        </label>
+        <input 
+          name="password" 
+          type="password" 
+          id="password" 
+          class="form-control" 
+          placeholder="At least 6 characters" 
+          required 
+          minlength="6"
+        />
+      </div>
+
+      <div class="row g-2 mb-4">
+        <div class="col-6">
+          <label for="age" class="form-label">Age</label>
+          <input 
+            name="age" 
+            type="number" 
+            id="age" 
+            class="form-control" 
+            placeholder="e.g. 21" 
+            min="13" 
+            max="120"
+            value="22"
+          />
+        </div>
+        <div class="col-6">
+          <label for="gender" class="form-label">Gender</label>
+          <select name="gender" id="gender" class="form-select bg-dark text-white border-secondary">
+            <option value="unspecified">Prefer not to say</option>
+            <option value="female">Female</option>
+            <option value="male">Male</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn-primary-custom w-100 py-2 fw-bold mb-3">
+        Sign Up
+      </button>
+    </form>
+
+    <div class="border-top border-dark-subtle pt-3 mt-3">
+      <p class="text-secondary small mb-0">
+        Already have an account? 
+        <a href="/login" class="text-primary fw-bold">Log in</a>
+      </p>
+    </div>
+  </div>
+</div>

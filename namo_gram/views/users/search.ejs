@@ -1,0 +1,75 @@
+<% layout("/layouts/boilerplate.ejs") %>
+
+<div class="search-container">
+  <div class="mb-4">
+    <h3 class="fw-bold text-white mb-1">
+      <i class="fa-solid fa-magnifying-glass text-primary me-2"></i>Search Profiles
+    </h3>
+    <p class="text-secondary small">Find other users by their unique username</p>
+  </div>
+
+  <!-- Search Form -->
+  <form action="/search" method="GET" class="mb-4">
+    <div class="search-input-group d-flex gap-2">
+      <div class="position-relative flex-grow-1">
+        <i class="fa-solid fa-magnifying-glass search-icon-input"></i>
+        <input 
+          type="text" 
+          name="q" 
+          value="<%= q %>" 
+          class="form-control search-field" 
+          placeholder="Search by username (e.g. user_001, demo)..."
+          autofocus
+        >
+      </div>
+      <button type="submit" class="btn btn-primary-custom px-4">
+        Search
+      </button>
+    </div>
+  </form>
+
+  <!-- Search Results -->
+  <div class="search-results-list">
+    <% if (q) { %>
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <span class="text-secondary small">
+          Results for <strong class="text-white">"<%= q %>"</strong> (<%= users.length %> found)
+        </span>
+        <% if (users.length > 0) { %>
+          <a href="/search" class="text-secondary small">Clear search</a>
+        <% } %>
+      </div>
+    <% } else { %>
+      <h6 class="text-secondary text-uppercase small fw-bold mb-3">Suggested Profiles</h6>
+    <% } %>
+
+    <% if (users.length === 0) { %>
+      <div class="custom-card text-center py-5">
+        <i class="fa-regular fa-user fa-3x text-secondary mb-3"></i>
+        <h5 class="text-white">No users found</h5>
+        <p class="text-secondary small mb-0">We couldn't find anyone matching "<%= q %>". Please check the spelling.</p>
+      </div>
+    <% } else { %>
+      <% for (let user of users) { %>
+        <div class="user-card">
+          <div class="user-card-info">
+            <div class="likes-user-avatar">
+              <%= user.username.charAt(0).toUpperCase() %>
+            </div>
+            <div>
+              <a href="/profile/<%= user.username %>" class="likes-user-name d-block mb-1">
+                @<%= user.username %>
+              </a>
+              <span class="badge bg-dark border border-secondary text-info small">
+                <i class="fa-regular fa-image me-1"></i><%= user.postCount %> <%= user.postCount === 1 ? 'post' : 'posts' %>
+              </span>
+            </div>
+          </div>
+          <a href="/profile/<%= user.username %>" class="btn btn-outline-custom btn-sm">
+            View Profile
+          </a>
+        </div>
+      <% } %>
+    <% } %>
+  </div>
+</div>

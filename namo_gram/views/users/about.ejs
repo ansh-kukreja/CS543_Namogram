@@ -1,0 +1,147 @@
+<% layout("/layouts/boilerplate.ejs") %>
+
+<div class="container py-5" style="max-width: 860px;">
+  <!-- Header / Hero Section -->
+  <div class="custom-card text-center mb-4">
+    <div class="mb-3 d-flex justify-content-center">
+      <%- include("../includes/logo.ejs", { size: 60 }) %>
+    </div>
+    <h1 class="fw-bold text-white mb-2">About NamoGram</h1>
+    <p class="text-secondary lead mx-auto mb-3" style="max-width: 650px;">
+      A social networking platform engineered with the <strong>MERN stack</strong>, featuring creator analytics, post tags, and audience engagement graphs.
+    </p>
+
+    <% if (!currUser) { %>
+      <div class="d-flex justify-content-center gap-3 mt-3">
+        <a href="/signup" class="btn btn-primary-custom px-4 py-2">
+          Join NamoGram
+        </a>
+        <a href="/login" class="btn btn-outline-custom px-4 py-2">
+          Log In
+        </a>
+      </div>
+    <% } else { %>
+      <div class="mt-3">
+        <a href="/posts" class="btn btn-primary-custom px-4 py-2">
+          <i class="fa-solid fa-house me-2"></i> Return to Feed
+        </a>
+      </div>
+    <% } %>
+  </div>
+
+  <!-- Tech Stack Section (MERN) -->
+  <div class="mb-5">
+    <div class="d-flex align-items-center gap-2 mb-3">
+      <div class="badge bg-primary text-white px-3 py-2 fs-6">TECH STACK</div>
+      <h3 class="text-white fw-bold mb-0">MERN Architecture</h3>
+    </div>
+
+    <div class="row g-3">
+      <!-- MongoDB -->
+      <div class="col-md-6">
+        <div class="custom-card h-100 p-4">
+          <div class="d-flex align-items-center mb-3">
+            <div class="likes-user-avatar me-3" style="background: rgba(0, 149, 246, 0.15); border-color: #0095f6;">
+              <i class="fa-solid fa-database text-info"></i>
+            </div>
+            <div>
+              <h5 class="text-white mb-0 fw-bold">MongoDB & Mongoose</h5>
+              <small class="text-primary font-monospace">Database Layer</small>
+            </div>
+          </div>
+          <p class="text-secondary small mb-0">
+            Stores indexed document collections for user identities, post streams, followers graphs, and engagement matrices with high schema flexibility.
+          </p>
+        </div>
+      </div>
+
+      <!-- Express.js -->
+      <div class="col-md-6">
+        <div class="custom-card h-100 p-4">
+          <div class="d-flex align-items-center mb-3">
+            <div class="likes-user-avatar me-3" style="background: rgba(0, 149, 246, 0.15); border-color: #0095f6;">
+              <i class="fa-solid fa-server text-info"></i>
+            </div>
+            <div>
+              <h5 class="text-white mb-0 fw-bold">Express.js</h5>
+              <small class="text-primary font-monospace">Backend REST Framework</small>
+            </div>
+          </div>
+          <p class="text-secondary small mb-0">
+            Coordinates modular routing, Passport.js session security, API username validation, like mechanisms, and account switching controllers.
+          </p>
+        </div>
+      </div>
+
+      <!-- React / EJS Views -->
+      <div class="col-md-6">
+        <div class="custom-card h-100 p-4">
+          <div class="d-flex align-items-center mb-3">
+            <div class="likes-user-avatar me-3" style="background: rgba(0, 149, 246, 0.15); border-color: #0095f6;">
+              <i class="fa-solid fa-layer-group text-info"></i>
+            </div>
+            <div>
+              <h5 class="text-white mb-0 fw-bold">Dynamic EJS / Reactive UI</h5>
+              <small class="text-primary font-monospace">Frontend Presentation Layer</small>
+            </div>
+          </div>
+          <p class="text-secondary small mb-0">
+            Renders responsive desktop and mobile templates, interactive Chart.js analytics graphs, tag chip selectors, and modal overlays.
+          </p>
+        </div>
+      </div>
+
+      <!-- Node.js -->
+      <div class="col-md-6">
+        <div class="custom-card h-100 p-4">
+          <div class="d-flex align-items-center mb-3">
+            <div class="likes-user-avatar me-3" style="background: rgba(0, 149, 246, 0.15); border-color: #0095f6;">
+              <i class="fa-brands fa-node-js text-info fs-4"></i>
+            </div>
+            <div>
+              <h5 class="text-white mb-0 fw-bold">Node.js</h5>
+              <small class="text-primary font-monospace">Runtime Environment</small>
+            </div>
+          </div>
+          <p class="text-secondary small mb-0">
+            Powers asynchronous, event-driven I/O execution ensuring low latency for image feeds, query aggregation, and authentication flows.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Development Team Section -->
+  <div class="mb-4">
+    <div class="d-flex align-items-center gap-2 mb-3">
+      <div class="badge bg-info text-dark px-3 py-2 fs-6">TEAM</div>
+      <h3 class="text-white fw-bold mb-0">Development Team</h3>
+    </div>
+
+    <% 
+      const team = [
+        { name: "Gauraansh Gaur", role: "Full Stack Engineer" },
+        { name: "Jatin Mandwani", role: "Backend & Database Architect" },
+        { name: "Shraiyansh Chaware", role: "Frontend & UI/UX Developer" },
+        { name: "Utkarsh Singh", role: "Systems & Security Engineer" },
+        { name: "Abhishek Yadav", role: "Product & Analytics Engineer" }
+      ];
+    %>
+
+    <div class="row g-3">
+      <% for (let member of team) { %>
+        <div class="col-md-4 col-sm-6">
+          <div class="custom-card p-3 h-100 d-flex align-items-center gap-3">
+            <div class="likes-user-avatar flex-shrink-0" style="width: 44px; height: 44px; font-size: 1.1rem;">
+              <%= member.name.charAt(0) %>
+            </div>
+            <div>
+              <h6 class="text-white mb-0 fw-bold"><%= member.name %></h6>
+              <small class="text-secondary"><%= member.role %></small>
+            </div>
+          </div>
+        </div>
+      <% } %>
+    </div>
+  </div>
+</div>

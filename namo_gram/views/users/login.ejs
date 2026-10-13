@@ -1,0 +1,59 @@
+<% layout("/layouts/boilerplate.ejs") %>
+
+<div class="container" style="max-width: 420px;">
+  <div class="custom-card text-center">
+    <div class="mb-4">
+      <div class="mb-3 d-flex justify-content-center">
+        <%- include("../includes/logo.ejs", { size: 54 }) %>
+      </div>
+      <h3 class="fw-bold text-white mb-1">NamoGram</h3>
+      <p class="text-secondary small">Connect with your friends & discover passions</p>
+    </div>
+
+    <% if (error) { %>
+      <div class="alert alert-danger py-2 px-3 mb-3 small text-start" role="alert">
+        <i class="fa-solid fa-circle-exclamation me-1"></i> <%= error %>
+      </div>
+    <% } %>
+
+    <form action="/login" method="POST" class="text-start">
+      <div class="mb-3">
+        <label for="username" class="form-label">Username</label>
+        <div class="input-group">
+          <input 
+            name="username" 
+            type="text" 
+            id="username" 
+            class="form-control" 
+            placeholder="Enter your username"
+            required 
+            autofocus
+          />
+        </div>
+      </div>
+
+      <div class="mb-4">
+        <label for="password" class="form-label">Password</label>
+        <input 
+          name="password" 
+          type="password" 
+          id="password" 
+          class="form-control" 
+          placeholder="Enter your password"
+          required
+        />
+      </div>
+
+      <button type="submit" class="btn btn-primary-custom w-100 py-2 fw-bold mb-3">
+        Log In
+      </button>
+    </form>
+
+    <div class="border-top border-dark-subtle pt-3 mt-3">
+      <p class="text-secondary small mb-0">
+        Don't have an account? 
+        <a href="/signup" class="text-primary fw-bold">Sign up</a>
+      </p>
+    </div>
+  </div>
+</div>

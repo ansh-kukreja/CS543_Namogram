@@ -1,0 +1,175 @@
+<% layout("/layouts/boilerplate") -%>
+
+<div class="feed-container">
+
+  <!-- Tag Filter Bar -->
+  <div class="tag-filter-bar">
+    <a href="/posts" class="tag-filter-chip <%= !currentTag ? 'active' : '' %>">
+      All
+    </a>
+    <% for (let tag of allowedTags) { %>
+      <a href="/posts?tag=<%= tag %>" class="tag-filter-chip <%= currentTag === tag ? 'active' : '' %>">
+        #<%= tag %>
+      </a>
+    <% } %>
+  </div>
+
+  <% if (allPosts.length === 0) { %>
+    <div class="custom-card text-center py-5 my-4">
+      <i class="fa-regular fa-images fa-3x text-secondary mb-3"></i>
+      <h4 class="text-white mb-2">No posts to display</h4>
+      <p class="text-secondary mb-4">
+        <%= currentTag ? `No posts found under #${currentTag}.` : 'Be the first one to share a post!' %>
+      </p>
+      <a href="/posts/new" class="btn btn-primary-custom">
+        <i class="fa-solid fa-plus me-1"></i> Create Post
+      </a>
+    </div>
+  <% } %>
+
+  <!-- Posts Feed -->
+  <% for (let post of allPosts) { 
+      const isLiked = post.likes && post.likes.includes(currUser.username);
+      const isOwner = post.userId === currUser.username;
+      
+      // Calculate precise human-friendly time difference
+      const now = new Date();
+      const postTime = post.uploadTime ? new Date(post.uploadTime) : new Date();
+      const diffSec = Math.max(0, Math.floor((now - postTime) / 1000));
+      let timeDisplay = "Just now";
+      if (diffSec >= 60 && diffSec < 3600) {
+        timeDisplay = `${Math.floor(diffSec / 60)} min ago`;
+      } else if (diffSec >= 3600 && diffSec < 86400) {
+        timeDisplay = `${Math.floor(diffSec / 3600)} h ago`;
+      } else if (diffSec >= 86400) {
+        timeDisplay = `${Math.floor(diffSec / 86400)} d ago`;
+      }
+  %>
+    <article class="post-card">
+      <!-- Post Header -->
+      <div class="post-header">
+        <div class="post-user-info">
+          <a href="/profile/<%= post.userId %>" class="text-decoration-none">
+            <div class="post-avatar-fallback">
+              <%= post.userId ? post.userId.charAt(0).toUpperCase() : 'U' %>
+            </div>
+          </a>
+          <div class="post-username-box">
+            <a href="/profile/<%= post.userId %>" class="post-username">
+              <%= post.userId %>
+            </a>
+            <span class="post-dot">&bull;</span>
+            <span class="post-time"><%= timeDisplay %></span>
+          </div>
+        </div>
+
+        <div class="dropdown">
+          <button class="post-icon-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+            <i class="fa-solid fa-ellipsis"></i>
+          </button>
+          <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end">
+            <li><a class="dropdown-item" href="/posts/<%= post._id %>"><i class="fa-regular fa-eye me-2"></i>View Post Details</a></li>
+            <li><a class="dropdown-item" href="/profile/<%= post.userId %>"><i class="fa-regular fa-user me-2"></i>View Profile</a></li>
+            <% if (isOwner) { %>
+              <li><hr class="dropdown-divider"></li>
+              <li><a class="dropdown-item" href="/posts/<%= post._id %>/edit"><i class="fa-regular fa-pen-to-square me-2"></i>Edit Post</a></li>
+              <li>
+                <form action="/posts/<%= post._id %>?_method=DELETE" method="POST" onsubmit="return confirm('Delete this post?');">
+                  <button class="dropdown-item text-danger" type="submit"><i class="fa-regular fa-trash-can me-2"></i>Delete Post</button>
+                </form>
+              </li>
+            <% } %>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Post Media -->
+      <div class="post-media">
+        <img 
+          src="<%= post.image %>" 
+          alt="<%= post.caption || 'Post image' %>" 
+          class="post-image" 
+          loading="lazy"
+          onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=900&auto=format&fit=crop';"
+        >
+      </div>
+
+      <!-- Post Actions (Only like button - comment, share, save removed) -->
+      <div class="post-actions">
+        <div class="action-btns-left">
+          <!-- Like Button -->
+          <button 
+            type="button" 
+            class="post-icon-btn like-btn <%= isLiked ? 'liked' : '' %>" 
+            data-post-id="<%= post._id %>"
+            title="<%= isLiked ? 'Unlike' : 'Like' %>"
+          >
+            <i class="<%= isLiked ? 'fa-solid fa-heart' : 'fa-regular fa-heart' %>"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Likes Section (Clickable count to open list of persons who liked) -->
+      <div class="post-likes-section">
+        <button 
+          type="button" 
+          class="likes-view-btn" 
+          data-bs-toggle="modal" 
+          data-bs-target="#likesModal-<%= post._id %>"
+        >
+          <span id="like-count-<%= post._id %>"><%= post.likes ? post.likes.length : 0 %></span> likes
+        </button>
+      </div>
+
+      <!-- Caption -->
+      <% if (post.caption) { %>
+        <div class="post-caption-section">
+          <span class="post-caption-text">
+            <a href="/profile/<%= post.userId %>" class="post-username me-1"><%= post.userId %></a>
+            <%= post.caption %>
+          </span>
+        </div>
+      <% } %>
+
+      <!-- Tags List -->
+      <% if (post.tags && post.tags.length > 0) { %>
+        <div class="post-tags-list">
+          <% for (let tag of post.tags) { %>
+            <a href="/posts?tag=<%= tag %>" class="post-tag-badge">#<%= tag %></a>
+          <% } %>
+        </div>
+      <% } %>
+    </article>
+
+    <!-- Modal for Post Likes List -->
+    <div class="modal fade" id="likesModal-<%= post._id %>" tabindex="-1" aria-labelledby="likesModalLabel-<%= post._id %>" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content custom-dark-modal">
+          <div class="modal-header">
+            <h5 class="modal-title" id="likesModalLabel-<%= post._id %>">Likes</h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body" id="likesList-<%= post._id %>">
+            <% if (!post.likes || post.likes.length === 0) { %>
+              <div class="text-muted text-center py-4">No likes yet. Be the first to like this!</div>
+            <% } else { %>
+              <% for (let likeUser of post.likes) { %>
+                <div class="likes-user-row">
+                  <div class="likes-user-left">
+                    <div class="likes-user-avatar">
+                      <%= likeUser.charAt(0).toUpperCase() %>
+                    </div>
+                    <a href="/profile/<%= likeUser %>" class="likes-user-name"><%= likeUser %></a>
+                  </div>
+                  <a href="/profile/<%= likeUser %>" class="btn btn-outline-custom btn-sm">View Profile</a>
+                </div>
+              <% } %>
+            <% } %>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  <% } %>
+
+</div>
