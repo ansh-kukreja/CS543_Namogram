@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
+                  xmlns:mod="http://partner.namogram.com/moderation">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <soapenv:Fault>
+         <faultcode>soapenv:Client</faultcode>
+         <faultstring>Media content violates safety policies</faultstring>
+         <detail>
+            <mod:ContentViolationFault>
+               <mod:reason>Inappropriate visual content detected</mod:reason>
+               <mod:code>4001</mod:code>
+            </mod:ContentViolationFault>
+         </detail>
+      </soapenv:Fault>
+   </soapenv:Body>
+</soapenv:Envelope>

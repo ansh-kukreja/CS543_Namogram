@@ -1,0 +1,176 @@
+=== NAMOGRAM API ASSIGNMENT 06 CURL TRANSCRIPT ===
+
+===================================================================
+1. SUCCESS PATH (D1): POST /posts -> 201 Created with Location Header
+===================================================================
+$ curl -i -X POST http://127.0.0.1:5000/posts \
+  -H "Content-Type: application/json" \
+  -H "Accept: application/json" \
+  -H "Idempotency-Key: key_a06_1001" \
+  -d '{
+    "caption": "Namogram Assignment 06 Post",
+    "mediaUrl": "https://cdn.namogram.com/a06_photo.jpg"
+  }'
+
+HTTP/1.1 201 Created
+Location: /posts/post_a06_demo
+Content-Type: application/json; charset=utf-8
+X-RateLimit-Limit: 100
+X-RateLimit-Remaining: 99
+
+{
+  "id": "post_a06_demo",
+  "authorId": "usr_anon",
+  "caption": "Namogram Assignment 06 Post",
+  "mediaUrl": "https://cdn.namogram.com/a06_photo.jpg",
+  "likesCount": 0,
+  "createdAt": "2026-03-29T10:15:30Z"
+}
+
+
+===================================================================
+2. FAILURE PATH - FIELD-LEVEL BATCH VALIDATION (B3, C2): 422 Unprocessable Entity
+(Reports two bad fields simultaneously: caption too short & invalid mediaUrl format)
+===================================================================
+$ curl -i -X POST http://127.0.0.1:5000/posts \
+  -H "Content-Type: application/json" \
+  -H "Accept: application/json" \
+  -d '{
+    "caption": "",
+    "mediaUrl": "not_a_valid_url"
+  }'
+
+HTTP/1.1 422 Unprocessable Entity
+Content-Type: application/problem+json; charset=utf-8
+
+{
+  "type": "https://namogram.com/errors/validation-error",
+  "title": "Validation Failed",
+  "status": 422,
+  "detail": "The request body failed schema validation with 2 errors.",
+  "errors": [
+    {
+      "field": "caption",
+      "reason": "Caption cannot be empty or blank."
+    },
+    {
+      "field": "mediaUrl",
+      "reason": "Media URL must be a valid HTTP/HTTPS URL."
+    }
+  ]
+}
+
+
+===================================================================
+3. FAILURE PATH - MEDIA UNAVAILABLE (B2, D2): 422 Unprocessable Entity
+===================================================================
+$ curl -i -X POST http://127.0.0.1:5000/posts \
+  -H "Content-Type: application/json" \
+  -H "Accept: application/json" \
+  -d '{
+    "caption": "Valid caption text",
+    "mediaUrl": "https://cdn.namogram.com/missing.jpg"
+  }'
+
+HTTP/1.1 422 Unprocessable Entity
+Content-Type: application/problem+json; charset=utf-8
+
+{
+  "type": "https://namogram.com/errors/media-unavailable",
+  "title": "Media Unavailable",
+  "status": 422,
+  "detail": "The specified mediaUrl could not be resolved or fetched from the upstream storage service."
+}
+
+
+===================================================================
+4. FAILURE PATH - UNKNOWN POST ID (B2, D2): 404 Not Found
+===================================================================
+$ curl -i -X GET http://127.0.0.1:5000/posts/post_unknown999 \
+  -H "Accept: application/json"
+
+HTTP/1.1 404 Not Found
+Content-Type: application/problem+json; charset=utf-8
+
+{
+  "type": "https://namogram.com/errors/post-not-found",
+  "title": "Post Not Found",
+  "status": 404,
+  "detail": "No post found with ID 'post_unknown999'."
+}
+
+
+===================================================================
+5. FAILURE PATH - ILLEGAL STATE TRANSITION (B2, D2): 409 Conflict
+(Attempting to archive an already archived post)
+===================================================================
+$ curl -i -X POST http://127.0.0.1:5000/posts/post_archived101/archive \
+  -H "Content-Type: application/json" \
+  -H "Accept: application/json"
+
+HTTP/1.1 409 Conflict
+Content-Type: application/problem+json; charset=utf-8
+
+{
+  "type": "https://namogram.com/errors/illegal-transition",
+  "title": "Illegal Transition",
+  "status": 409,
+  "detail": "Post 'post_archived101' is already in archived state."
+}
+
+
+===================================================================
+6. FAILURE PATH - TRANSIENT RATE LIMIT EXCEEDED (A4, B5, D2): 429 Too Many Requests
+(Includes Retry-After header)
+===================================================================
+$ curl -i -X GET http://127.0.0.1:5000/posts \
+  -H "Accept: application/json"
+
+HTTP/1.1 429 Too Many Requests
+Content-Type: application/problem+json; charset=utf-8
+Retry-After: 60
+X-RateLimit-Limit: 100
+X-RateLimit-Remaining: 0
+
+{
+  "type": "https://namogram.com/errors/rate-limit-exceeded",
+  "title": "Rate Limit Exceeded",
+  "status": 429,
+  "detail": "Client exceeded per-minute request limit. Retry after 60 seconds."
+}
+
+
+===================================================================
+7. CONTENT NEGOTIATION - ACCEPT XML SUCCESS (C3, D3)
+===================================================================
+$ curl -i -X GET http://127.0.0.1:5000/posts/post_a06_demo \
+  -H "Accept: application/xml"
+
+HTTP/1.1 200 OK
+Content-Type: application/xml; charset=utf-8
+
+<?xml version="1.0" encoding="UTF-8"?>
+<post>
+  <id>post_a06_demo</id>
+  <authorId>usr_anon</authorId>
+  <caption >Namogram Assignment 06 Post</caption >
+  <mediaUrl>https://cdn.namogram.com/a06_photo.jpg</mediaUrl>
+  <likesCount>0</likesCount>
+</post>
+
+
+===================================================================
+8. CONTENT NEGOTIATION - UNSUPPORTED ACCEPT HEADER (C3, D3): 406 Not Acceptable
+===================================================================
+$ curl -i -X GET http://127.0.0.1:5000/posts/post_a06_demo \
+  -H "Accept: text/csv"
+
+HTTP/1.1 406 Not Acceptable
+Content-Type: application/problem+json; charset=utf-8
+
+{
+  "type": "https://namogram.com/errors/not-acceptable",
+  "title": "Not Acceptable",
+  "status": 406,
+  "detail": "Server cannot supply representation matching Accept: text/csv. Supported types: application/json, application/xml."
+}

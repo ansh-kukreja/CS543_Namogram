@@ -1,0 +1,180 @@
+openapi: 3.0.3
+info:
+  title: Namogram Posts Service API
+  description: CS543 Assignment 04 - RESTful Web Service Specification
+  version: 1.0.0
+servers:
+  - url: http://localhost:5000
+    description: Local Development Server
+
+paths:
+  /posts:
+    post:
+      summary: Create a new post
+      operationId: createPost
+      parameters:
+        - in: header
+          name: Idempotency-Key
+          required: false
+          schema:
+            type: string
+          description: Unique key to ensure request idempotency
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePostRequest'
+      responses:
+        '201':
+          description: Post Created Successfully
+          headers:
+            Location:
+              schema:
+                type: string
+              description: URI of the newly created post resource
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostResponse'
+        '400':
+          $ref: '#/components/responses/ProblemDetails400'
+        '422':
+          $ref: '#/components/responses/ProblemDetails422'
+
+    get:
+      summary: List or filter posts
+      operationId: listPosts
+      parameters:
+        - in: query
+          name: authorId
+          required: false
+          schema:
+            type: string
+          description: Filter posts by author identifier
+      responses:
+        '200':
+          description: List of posts retrieved
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PostResponse'
+
+  /posts/{id}:
+    get:
+      summary: Get post details by ID
+      operationId: getPostById
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Post details retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostResponse'
+        '404':
+          $ref: '#/components/responses/ProblemDetails404'
+
+  /posts/{id}/likes:
+    post:
+      summary: Add a like to a post (Sub-resource state change)
+      operationId: addLike
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Like count updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  likesCount:
+                    type: integer
+        '404':
+          $ref: '#/components/responses/ProblemDetails404'
+
+components:
+  schemas:
+    CreatePostRequest:
+      type: object
+      required:
+        - caption
+        - mediaUrl
+      properties:
+        authorId:
+          type: string
+        caption:
+          type: string
+        mediaUrl:
+          type: string
+
+    PostResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        authorId:
+          type: string
+        caption:
+          type: string
+        mediaUrl:
+          type: string
+        likesCount:
+          type: integer
+        version:
+          type: integer
+
+    ProblemDetails:
+      type: object
+      properties:
+        type:
+          type: string
+        title:
+          type: string
+        status:
+          type: integer
+        detail:
+          type: string
+        errors:
+          type: array
+          items:
+            type: object
+            properties:
+              field:
+                type: string
+              reason:
+                type: string
+
+  responses:
+    ProblemDetails400:
+      description: Bad Request / Malformed Body
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetails'
+    ProblemDetails404:
+      description: Resource Not Found
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetails'
+    ProblemDetails422:
+      description: Validation Error
+      content:
+        application/problem+json:
+          schema:
+            $ref: '#/components/schemas/ProblemDetails'

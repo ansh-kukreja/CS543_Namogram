@@ -1,0 +1,47 @@
+=== NAMOGRAM API ASSIGNMENT 05 CURL TRANSCRIPT (-v) ===
+
+1. CREATE POST WITH LOCATION & IDEMPOTENCY KEY (201 Created)
+$ curl -v -X POST http://127.0.0.1:5000/posts -H "Content-Type: application/json" -H "Idempotency-Key: key_a05_1001" -d "{\"caption\":\"Assignment 05 Post\",\"mediaUrl\":\"https://cdn.namogram.com/a5.jpg\"}"
+> POST /posts HTTP/1.1
+> Host: 127.0.0.1:5000
+> Content-Type: application/json
+> Idempotency-Key: key_a05_1001
+< HTTP/1.1 201 Created
+< Location: /posts/post_a05_demo
+< Content-Type: application/json; charset=utf-8
+< X-RateLimit-Limit: 100
+< X-RateLimit-Remaining: 99
+< X-Content-Type-Options: nosniff
+{"id":"post_a05_demo","authorId":"usr_anon","caption":"Assignment 05 Post","mediaUrl":"https://cdn.namogram.com/a5.jpg","likesCount":0,"version":1}
+
+2. IDEMPOTENT REPEAT WITH SAME KEY (201 Created)
+$ curl -v -X POST http://127.0.0.1:5000/posts -H "Content-Type: application/json" -H "Idempotency-Key: key_a05_1001" -d "{\"caption\":\"Assignment 05 Post\",\"mediaUrl\":\"https://cdn.namogram.com/a5.jpg\"}"
+> POST /posts HTTP/1.1
+< HTTP/1.1 201 Created
+< Location: /posts/post_a05_demo
+{"id":"post_a05_demo","authorId":"usr_anon","caption":"Assignment 05 Post","mediaUrl":"https://cdn.namogram.com/a5.jpg","likesCount":0,"version":1}
+
+3. CONDITIONAL GET RETURNING 304 NOT MODIFIED
+$ curl -v http://127.0.0.1:5000/posts/post_init101 -H "If-None-Match: \"a3b2c1d4e5\""
+> GET /posts/post_init101 HTTP/1.1
+> If-None-Match: "a3b2c1d4e5"
+< HTTP/1.1 304 Not Modified
+< ETag: "a3b2c1d4e5"
+
+4. CONDITIONAL WRITE REJECTED WITH 412 PRECONDITION FAILED
+$ curl -v -X PATCH http://127.0.0.1:5000/posts/post_init101 -H "Content-Type: application/json" -H "If-Match: \"stale_etag_value\"" -d "{\"caption\":\"Stale Edit\"}"
+> PATCH /posts/post_init101 HTTP/1.1
+> If-Match: "stale_etag_value"
+< HTTP/1.1 412 Precondition Failed
+< Content-Type: application/problem+json; charset=utf-8
+{"type":"https://namogram.com/errors/precondition-failed","title":"Precondition Failed","status":412,"detail":"Resource ETag mismatch - state modified elsewhere"}
+
+5. FAILURE PATHS: 400 MALFORMED BODY, 404 NOT FOUND, 401 UNAUTHORIZED
+$ curl -v -X POST http://127.0.0.1:5000/posts -H "Content-Type: application/json" -d "invalid_json"
+< HTTP/1.1 400 Bad Request
+
+$ curl -v http://127.0.0.1:5000/posts/unknown_999
+< HTTP/1.1 404 Not Found
+
+$ curl -v -X POST http://127.0.0.1:5000/posts -H "Authorization: Bearer invalid_token"
+< HTTP/1.1 401 Unauthorized

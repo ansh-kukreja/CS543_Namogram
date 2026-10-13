@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
+                  xmlns:mod="http://partner.namogram.com/moderation">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <mod:ProcessMediaResponse>
+         <mod:status>PASSED</mod:status>
+         <mod:processedUrl>https://cdn.namogram.com/processed/optimized_image_101.jpg</mod:processedUrl>
+      </mod:ProcessMediaResponse>
+   </soapenv:Body>
+</soapenv:Envelope>

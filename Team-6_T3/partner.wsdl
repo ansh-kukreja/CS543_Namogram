@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions name="MediaModerationService"
+             targetNamespace="http://partner.namogram.com/moderation"
+             xmlns="http://schemas.xmlsoap.org/wsdl/"
+             xmlns:tns="http://partner.namogram.com/moderation"
+             xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+             xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/">
+
+  <types>
+    <xsd:schema targetNamespace="http://partner.namogram.com/moderation">
+      <xsd:element name="ProcessMediaRequest">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="mediaUrl" type="xsd:string"/>
+            <xsd:element name="postType" type="xsd:string"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="ProcessMediaResponse">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="status" type="xsd:string"/>
+            <xsd:element name="processedUrl" type="xsd:string"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+      <xsd:element name="ContentViolationFault">
+        <xsd:complexType>
+          <xsd:sequence>
+            <xsd:element name="reason" type="xsd:string"/>
+            <xsd:element name="code" type="xsd:int"/>
+          </xsd:sequence>
+        </xsd:complexType>
+      </xsd:element>
+    </xsd:schema>
+  </types>
+
+  <message name="ProcessMediaInput">
+    <part name="parameters" element="tns:ProcessMediaRequest"/>
+  </message>
+  <message name="ProcessMediaOutput">
+    <part name="parameters" element="tns:ProcessMediaResponse"/>
+  </message>
+  <message name="ContentViolationFaultMessage">
+    <part name="fault" element="tns:ContentViolationFault"/>
+  </message>
+
+  <portType name="MediaModerationPortType">
+    <operation name="ProcessMediaContent">
+      <input message="tns:ProcessMediaInput"/>
+      <output message="tns:ProcessMediaOutput"/>
+      <fault name="ViolationFault" message="tns:ContentViolationFaultMessage"/>
+    </operation>
+  </portType>
+
+  <binding name="MediaModerationBinding" type="tns:MediaModerationPortType">
+    <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+    <operation name="ProcessMediaContent">
+      <soap:operation soapAction="http://partner.namogram.com/moderation/ProcessMediaContent"/>
+      <input><soap:body use="literal"/></input>
+      <output><soap:body use="literal"/></output>
+      <fault name="ViolationFault"><soap:fault name="ViolationFault" use="literal"/></fault>
+    </operation>
+  </binding>
+
+  <service name="MediaModerationService">
+    <port name="MediaModerationPort" binding="tns:MediaModerationBinding">
+      <soap:address location="https://partner-gateway.namogram.com/soap/moderation"/>
+    </port>
+  </service>
+</definitions>

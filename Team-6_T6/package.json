@@ -1,0 +1,18 @@
+{
+    "name": "namogram-posts-service-a6",
+    "version": "1.0.0",
+    "description": "Namogram Post Service - CS543 Assignment 06 Problem Details & Content Negotiation",
+    "main": "app.js",
+    "scripts": {
+        "start": "node app.js",
+        "test": "jest --runInBand"
+    },
+    "dependencies": {
+        "cors": "^2.8.5",
+        "express": "^4.19.2"
+    },
+    "devDependencies": {
+        "jest": "^29.7.0",
+        "supertest": "^6.3.4"
+    }
+}

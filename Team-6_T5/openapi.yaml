@@ -1,0 +1,170 @@
+openapi: 3.0.3
+info:
+  title: Namogram Posts Service API (Assignment 05)
+  description: CS543 Assignment 05 - HTTP Methods, Headers, Caching & Safe Retries
+  version: 1.0.0
+servers:
+  - url: http://localhost:5000
+    description: Local Development Server
+
+paths:
+  /posts:
+    post:
+      summary: Create a new post
+      operationId: createPost
+      parameters:
+        - in: header
+          name: Idempotency-Key
+          required: false
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePostRequest'
+      responses:
+        '201':
+          description: Created
+          headers:
+            Location:
+              schema:
+                type: string
+            X-RateLimit-Limit:
+              schema:
+                type: string
+            X-RateLimit-Remaining:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostResponse'
+        '400':
+          $ref: '#/components/responses/ProblemDetails400'
+        '401':
+          $ref: '#/components/responses/ProblemDetails401'
+        '422':
+          $ref: '#/components/responses/ProblemDetails422'
+
+    get:
+      summary: Filter or list posts
+      operationId: listPosts
+      responses:
+        '200':
+          description: List of posts
+
+  /posts/{id}:
+    options:
+      summary: OPTIONS preflight check
+      responses:
+        '204':
+          description: Preflight Success
+          headers:
+            Allow:
+              schema:
+                type: string
+
+    get:
+      summary: Get single post with ETag caching
+      operationId: getPostById
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+        - in: header
+          name: If-None-Match
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Success
+          headers:
+            ETag:
+              schema:
+                type: string
+            Cache-Control:
+              schema:
+                type: string
+        '304':
+          description: Not Modified (ETag Match)
+        '404':
+          $ref: '#/components/responses/ProblemDetails404'
+
+    patch:
+      summary: Update post (Conditional Write with If-Match)
+      operationId: updatePost
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+        - in: header
+          name: If-Match
+          required: false
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                caption:
+                  type: string
+      responses:
+        '200':
+          description: Post updated
+        '412':
+          $ref: '#/components/responses/ProblemDetails412'
+
+components:
+  schemas:
+    CreatePostRequest:
+      type: object
+      required:
+        - caption
+        - mediaUrl
+      properties:
+        caption:
+          type: string
+        mediaUrl:
+          type: string
+
+    PostResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        caption:
+          type: string
+        mediaUrl:
+          type: string
+
+    ProblemDetails:
+      type: object
+      properties:
+        type:
+          type: string
+        status:
+          type: integer
+        detail:
+          type: string
+
+  responses:
+    ProblemDetails400:
+      description: Bad Request
+    ProblemDetails401:
+      description: Unauthorized
+    ProblemDetails404:
+      description: Not Found
+    ProblemDetails412:
+      description: Precondition Failed
+    ProblemDetails422:
+      description: Unprocessable Entity

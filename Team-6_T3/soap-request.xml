@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
+                  xmlns:mod="http://partner.namogram.com/moderation">
+   <soapenv:Header>
+      <AuthHeader xmlns="http://partner.namogram.com/auth">
+         <Token>bearer_partner_secret_token_9988</Token>
+      </AuthHeader>
+   </soapenv:Header>
+   <soapenv:Body>
+      <mod:ProcessMediaRequest>
+         <mod:mediaUrl>https://cdn.namogram.com/uploads/raw_image_101.jpg</mod:mediaUrl>
+         <mod:postType>IMAGE</mod:postType>
+      </mod:ProcessMediaRequest>
+   </soapenv:Body>
+</soapenv:Envelope>
